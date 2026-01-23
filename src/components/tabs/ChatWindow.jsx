@@ -65,6 +65,7 @@ export const ChatWindow = ({ activeTab }) => {
   const [activeStep, setActiveStep] = useState(1);
   const [isStepsSidebarOpen, setIsStepsSidebarOpen] = useState(false);
   const [isSendDisabled, setIsSendDisabled] = useState(false);
+  const [skipTokenUsage, setSkipTokenUsage] = useState(false);
 
   const steps = [
     { number: 1, title: "Foundation and Preparation" },
@@ -124,6 +125,7 @@ export const ChatWindow = ({ activeTab }) => {
       (async () => {
         try {
           const stats = await chatService.getTokenStats();
+          setSkipTokenUsage(stats.skipTokenUsage);
           setTokenStats(stats);
         } catch (e) {
         }
@@ -302,6 +304,7 @@ export const ChatWindow = ({ activeTab }) => {
 
       try {
         const stats = await chatService.getTokenStats();
+        setSkipTokenUsage(stats.skipTokenUsage);
         setTokenStats(stats);
       } catch { }
     } catch (err) {
@@ -432,6 +435,7 @@ export const ChatWindow = ({ activeTab }) => {
 
       try {
         const stats = await chatService.getTokenStats();
+        setSkipTokenUsage(stats.skipTokenUsage);
         setTokenStats(stats);
       } catch { }
     } catch (err) {
@@ -499,6 +503,11 @@ export const ChatWindow = ({ activeTab }) => {
         </div>
         <div className="flex items-center justify-end gap-1.5 sm:gap-2 md:gap-3 flex-shrink-0">
           {(() => {
+            // Hide token usage container if skipTokenUsage is true
+            if (skipTokenUsage) {
+              return null;
+            }
+
             const totalLimit = typeof tokenStats.total === 'number' ? tokenStats.total : 20000;
             const usedValue = typeof tokenStats.used === 'number' ? tokenStats.used : 0;
             const exhausted = usedValue >= totalLimit && totalLimit > 0;
@@ -675,6 +684,7 @@ export const ChatWindow = ({ activeTab }) => {
 
                   try {
                     const stats = await chatService.getTokenStats();
+                    setSkipTokenUsage(stats.skipTokenUsage);
                     setTokenStats(stats);
                   } catch { }
                 } catch (err) {
