@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from bubbleio.models import BubbleUserModel
@@ -35,8 +36,14 @@ class TokenUsage(models.Model):
         related_name="bubble_user_token_usage",
         verbose_name=_("Bubble user")
     )
+    # monthly ai credits limit
     token_count = models.IntegerField(default=60000, verbose_name=_("Token count"))
+    # credit remaining
     token_used = models.IntegerField(default=0, verbose_name=_("Token used"))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    # renewable date
+    renewable_date = models.DateTimeField(default=timezone.now)
     
     async def token_available(self):
         return self.token_used <= self.token_count

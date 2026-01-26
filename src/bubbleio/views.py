@@ -1,3 +1,4 @@
+from datetime import timedelta
 from traceback import format_exc
 from uuid import uuid4
 
@@ -7,10 +8,12 @@ from django.db import IntegrityError
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
+from ai.models import TokenUsage
 from bubbleio.models import BubbleUserModel
 from bubbleio.serializers import BubbleDataSerializer, BubbleRefreshTokenSerializer
 from utils import base64
@@ -83,6 +86,11 @@ class BubbleDataView(APIView):
             if created:
                 bubble_user.set_password(settings.BUBBLE_PASSWORD_DEFAULT)
                 await bubble_user.asave()
+                
+                # create a new token usage record for the new user
+                token_usage = await TokenUsage.objects.acreate(bubble_user=bubble_user)
+                token_usage.renewable_date = token_usage.created_at + timedelta(days=30)
+                await token_usage.asave()
             
             sid_key = str(uuid4())
             sid_value = await base64.encode_string(payload)

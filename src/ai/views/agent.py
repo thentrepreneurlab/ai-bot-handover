@@ -55,7 +55,7 @@ class AgentView(APIView):
         
         
 class TokenUsageView(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     
     async def get(self, request):
         try:
@@ -70,6 +70,8 @@ class TokenUsageView(APIView):
                 return Response({
                     "total_token": "60000",
                     "token_used": "0",
+                    "renewable_date": token.renewable_date,
+                    "created_at": token.created_at,
                     "skip_token_usage": True
                 }, status=status.HTTP_200_OK)
             
@@ -78,6 +80,8 @@ class TokenUsageView(APIView):
                 {
                     "total_token": token.token_count,
                     "token_used": token.token_used,
+                    "created_at": token.created_at,
+                    "renewable_date": token.renewable_date,
                     "skip_token_usage": False
                 },
                 status=status.HTTP_200_OK
