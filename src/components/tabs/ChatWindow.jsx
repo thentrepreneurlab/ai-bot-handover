@@ -61,7 +61,7 @@ export const ChatWindow = ({ activeTab }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [tokenStats, setTokenStats] = useState({ total: null, used: null });
+  const [tokenStats, setTokenStats] = useState({ total: null, used: null, createdAt: null, renewableDate: null });
   const [activeStep, setActiveStep] = useState(1);
   const [isStepsSidebarOpen, setIsStepsSidebarOpen] = useState(false);
   const [isSendDisabled, setIsSendDisabled] = useState(false);
@@ -143,7 +143,8 @@ export const ChatWindow = ({ activeTab }) => {
     if (isCoFounder && tokenStats.total && tokenStats.used !== null) {
       const totalLimit = typeof tokenStats.total === 'number' ? tokenStats.total : 20000;
       const usedValue = typeof tokenStats.used === 'number' ? tokenStats.used : 0;
-      const exhausted = usedValue >= totalLimit && totalLimit > 0;
+      const creditsRemaining = totalLimit - usedValue;
+      const exhausted = creditsRemaining <= 0 && totalLimit > 0;
       
       if (exhausted) {
         toast.error("Token consumed, add more tokens to continue.", {
@@ -510,11 +511,27 @@ export const ChatWindow = ({ activeTab }) => {
 
             const totalLimit = typeof tokenStats.total === 'number' ? tokenStats.total : 20000;
             const usedValue = typeof tokenStats.used === 'number' ? tokenStats.used : 0;
-            const exhausted = usedValue >= totalLimit && totalLimit > 0;
+            const creditsRemaining = totalLimit - usedValue;
+            const exhausted = creditsRemaining <= 0 && totalLimit > 0;
+
+            // Format date for display
+            const formatDate = (dateString) => {
+              if (!dateString) return '—';
+              try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+              } catch {
+                return dateString;
+              }
+            };
 
             if (exhausted) {
               return (
-                <div className="min-w-[100px] md:min-w-[120px] lg:min-w-[160px] bg-red-50 border border-red-200 rounded-lg p-1.5 sm:p-2 md:p-3 shadow-sm">
+                <div className="min-w-[140px] md:min-w-[160px] lg:min-w-[180px] bg-red-50 border border-red-200 rounded-lg p-1.5 sm:p-2 md:p-3 shadow-sm">
                   <div className="flex items-center justify-center py-0.5 sm:py-1">
                     <AlertTriangle size={12} className="text-red-600 mr-1 sm:mr-1.5 md:mr-2 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
                     <span className="text-[9px] sm:text-xs md:text-sm font-semibold text-red-700">All tokens are used</span>
@@ -524,20 +541,29 @@ export const ChatWindow = ({ activeTab }) => {
             }
 
             return (
-              <div className="min-w-[100px] md:min-w-[120px] lg:min-w-[160px] bg-gray-50 border border-gray-300 rounded-lg p-1 sm:p-1.5 md:p-2 shadow-sm">
-                <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 mb-0.5 sm:mb-1 md:mb-2">
+              <div className="min-w-[140px] md:min-w-[160px] lg:min-w-[200px] bg-gray-50 border border-gray-300 rounded-lg p-1.5 sm:p-2 md:p-2.5 shadow-sm">
+                <div className="flex items-center justify-center gap-1 sm:gap-1.5 md:gap-2 mb-1 sm:mb-1.5 md:mb-2">
                   <Gauge size={12} className="text-gray-600 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-                  <span className="text-[8px] sm:text-[10px] md:text-xs font-bold text-gray-700">Tokens</span>
+                  <span className="text-[8px] sm:text-[10px] md:text-xs font-bold text-gray-700">AI Credits</span>
                 </div>
-                <div className="flex items-stretch gap-2 sm:gap-3 md:gap-4 lg:gap-6 justify-center">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[7px] sm:text-[9px] md:text-[11px] uppercase tracking-wide text-gray-500">Used</span>
-                    <span className="text-xs sm:text-sm md:text-lg lg:text-xl font-mono tabular-nums font-semibold text-gray-900">{typeof tokenStats.used === 'number' ? tokenStats.used.toLocaleString() : (tokenStats.used ?? '—')}</span>
+                <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-600">Monthly AI Credits:</span>
+                    <span className="text-[8px] sm:text-[10px] md:text-xs font-mono tabular-nums font-semibold text-gray-900">
+                      {typeof tokenStats.total === 'number' ? tokenStats.total.toLocaleString() : (tokenStats.total ?? '—')}
+                    </span>
                   </div>
-                  <div className="w-px bg-gray-200" />
-                  <div className="flex flex-col items-center">
-                    <span className="text-[7px] sm:text-[9px] md:text-[11px] uppercase tracking-wide text-gray-500">Total</span>
-                    <span className="text-xs sm:text-sm md:text-lg lg:text-xl font-mono tabular-nums font-semibold text-gray-900">{typeof tokenStats.total === 'number' ? tokenStats.total.toLocaleString() : (tokenStats.total ?? '—')}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-600">Credits Remaining:</span>
+                    <span className="text-[8px] sm:text-[10px] md:text-xs font-mono tabular-nums font-semibold text-gray-900">
+                      {creditsRemaining >= 0 ? creditsRemaining.toLocaleString() : '—'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-600">Credits Renew On:</span>
+                    <span className="text-[8px] sm:text-[10px] md:text-xs font-mono tabular-nums font-semibold text-gray-900">
+                      {formatDate(tokenStats.renewableDate)}
+                    </span>
                   </div>
                 </div>
               </div>

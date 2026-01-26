@@ -167,9 +167,11 @@ export const chatService = {
 
     const used = payload.used ?? payload.tokens_used ?? payload.used_tokens ?? payload.token_used ?? null;
     const total = payload.total ?? payload.total_tokens ?? payload.tokens_total ?? payload.total_token ?? null;
+    const createdAt = payload.created_at ?? null;
+    const renewableDate = payload.renewable_date ?? null;
     const skipTokenUsage = payload.skip_token_usage;
 
-    return { used, total, skipTokenUsage };
+    return { used, total, createdAt, renewableDate, skipTokenUsage };
   }
 };
 
