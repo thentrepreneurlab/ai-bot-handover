@@ -199,7 +199,6 @@ cython_debug/
 #   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 #   and can be added to the global gitignore or merged into this file. However, if you prefer, 
 #   you could uncomment the following to ignore the entire vscode folder
-# .vscode/
 
 # Ruff stuff:
 .ruff_cache/
@@ -345,7 +344,6 @@ dist
 .tern-port
 
 # Stores VSCode versions used for testing VSCode extensions
-.vscode-test
 
 # yarn v3
 .pnp.*
@@ -361,3 +359,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 dist.tar
+temp_auto_push.bat
+temp_interactive_push.bat
+branch_structure.json
